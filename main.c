@@ -48,11 +48,9 @@ TREE makeNodeChar(char* x);
 
 
 int main(int argc, char* args[]) {
-    nextTerminal = "32+4";
+    nextTerminal = "34*(7+2)";
     parseTree = E();
     printTree(parseTree);
-    TREE test = makeNodeChar("x");
-    printTree (test);
 }
 
 TREE makeNodeE(TREE T, TREE TT){
@@ -81,9 +79,10 @@ TREE makeNodeTT(char* x, TREE T, TREE TT){
     root->label = "<TT>";
 
     TREE leftmostChild = makeNodeChar(x);
-    root->leftmostChild = leftmostChild;
     leftmostChild->rightSibling = T;
     leftmostChild->leftmostChild = NULL;
+
+    root->leftmostChild = leftmostChild;
     T->rightSibling = TT;
     return root;
 }
@@ -95,7 +94,10 @@ TREE makeNodeF(char* x, TREE E, char* x2){
 
     TREE leftmostChild = makeNodeChar(x);
     leftmostChild->rightSibling = E;
+    leftmostChild->leftmostChild = NULL;
+
     E->rightSibling= makeNodeChar(x2);
+    E->leftmostChild = NULL;
     return root;
 }
 
@@ -105,6 +107,7 @@ TREE makeNodeFN(TREE N){
     root->label="<F>";
 
     root->leftmostChild = N;
+    root->rightSibling = NULL;
     return root;
 }
 
@@ -115,8 +118,10 @@ TREE makeNodeFT(char* x, TREE F, TREE FT){
 
     TREE leftmostChild = makeNodeChar(x);
     leftmostChild->rightSibling = F;
+    leftmostChild->leftmostChild = NULL;
 
     root->leftmostChild = leftmostChild;
+    root->rightSibling = NULL;
     F->rightSibling = FT;
     return root;
 }
@@ -127,6 +132,7 @@ TREE makeNodeN(TREE D, TREE NT){
     root->label = "<N>";
 
     root->leftmostChild = D;
+    root->rightSibling = NULL;
     D->rightSibling = NT;
     return root;
 }
@@ -166,7 +172,6 @@ TREE makeNodeChar(char* x){
 
 
     root->label = x;
-    printf("reach");
     root->leftmostChild = NULL;
     root->rightSibling = NULL;
     return root;
@@ -177,7 +182,6 @@ TREE E() {
     TREE Tr, TTr;
 
     Tr = T();
-    printf("reach");
 
     TTr = TT();
 
@@ -356,6 +360,4 @@ void printTreeRecursively(TREE root, int indent){
     if(root->rightSibling!=NULL){
         printTreeRecursively(root->rightSibling, indent);
     }
-
-    free(label);
 }
