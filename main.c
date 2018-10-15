@@ -1,6 +1,8 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #define FAILED NULL
 
 typedef struct Node *TREE;
@@ -50,15 +52,23 @@ TREE makeNodeChar(char* x);
 
 
 int main(int argc, char* args[]) {
-    nextTerminal = "";
-    parseTree = E();
-    if(*nextTerminal == '\0'){
-        printTree(parseTree);
+    char input[256] = "";
+    while (strcmp(input, "quit") != 0) {
+        printf("Enter an expression to construct a parse tree using a recursive-descent parser:");
+        //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
+        //but this is ok(?) because 32 + 4 doesn't work with this code
+        //however 32 + 4+32 will work...
+        scanf("%s", input); //depreciated but added ability to use depreciated functions
+        nextTerminal = input; //doesn't work with empty string or spaces
+        parseTree = E();
+        if (*nextTerminal == '\0') {
+            printTree(parseTree);
+        } else {
+            printf("FAILED!\n");
+        }
+        free(parseTree);
     }
-    else{
-        printf("FAILED!");
-    }
-    free(parseTree);
+    return 0;
 }
 
 
@@ -180,8 +190,7 @@ TREE makeNodeD(char* x){
 }
 
 TREE makeNodeEmpty(char* label){
-    TREE root;
-    root = (TREE) malloc(sizeof(struct Node));
+    TREE root = (TREE) malloc(sizeof(struct Node));
     root->label = label;
 
     root->leftmostChild = makeNodeChar("e");
