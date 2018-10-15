@@ -58,6 +58,9 @@ int main(int argc, char* args[]) {
     else{
         printf("FAILED");
     }
+    printf("REACHED");
+
+
     free(parseTree);
 }
 
@@ -77,6 +80,7 @@ TREE makeNodeE(TREE T, TREE TT){
     root->label = "<E>";
 
     root->leftmostChild = T;
+    root->rightSibling = NULL;
     T->rightSibling = TT;
     return root;
 }
@@ -101,6 +105,8 @@ TREE makeNodeTT(char* x, TREE T, TREE TT){
     leftmostChild->leftmostChild = NULL;
 
     root->leftmostChild = leftmostChild;
+    root->rightSibling = NULL;
+
     T->rightSibling = TT;
     return root;
 }
@@ -163,6 +169,7 @@ TREE makeNodeNT(TREE N){
     root->label ="<NT>";
 
     root->leftmostChild = N;
+    root->rightSibling = NULL;
     return root;
 }
 
@@ -200,6 +207,7 @@ TREE makeNodeChar(char* x){
 
 TREE E() {
     TREE Tr, TTr;
+    printf("REACH");
 
     Tr = T();
     if(Tr==NULL){
@@ -420,6 +428,8 @@ void printTree(TREE root){
 
 void printTreeRecursively(TREE root, int indent){
     char* label;
+    printf("PRINTING");
+
     //label = (char*) malloc((indent+5)*sizeof(char));
     label = root->label;
     for(int i = 0; i<indent-1; i++){
