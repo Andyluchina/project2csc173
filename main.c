@@ -12,6 +12,7 @@ struct Node {
 
 char* nextTerminal;
 TREE parseTree;
+char** parseTable;
 
 TREE E();
 TREE T();
@@ -47,11 +48,28 @@ TREE makeNodeD(char* x);
 TREE makeNodeChar(char* x);
 
 
+
 int main(int argc, char* args[]) {
-    nextTerminal = "34*(7+2)";
+    nextTerminal = "700*42+(42)-4";
     parseTree = E();
-    printTree(parseTree);
+    if(*nextTerminal == '\0'){
+        printTree(parseTree);
+    }
+    else{
+        printf("FAILED");
+    }
+    free(parseTree);
 }
+
+
+
+char** makeParseTable(){
+    char**parseTable;
+    parseTable = (char**) malloc(sizeof(char*));
+    return parseTable;
+}
+
+
 
 TREE makeNodeE(TREE T, TREE TT){
     TREE root;
@@ -94,10 +112,10 @@ TREE makeNodeF(char* x, TREE E, char* x2){
 
     TREE leftmostChild = makeNodeChar(x);
     leftmostChild->rightSibling = E;
-    leftmostChild->leftmostChild = NULL;
+    root->leftmostChild = leftmostChild;
 
     E->rightSibling= makeNodeChar(x2);
-    E->leftmostChild = NULL;
+
     return root;
 }
 
@@ -133,7 +151,9 @@ TREE makeNodeN(TREE D, TREE NT){
 
     root->leftmostChild = D;
     root->rightSibling = NULL;
+
     D->rightSibling = NT;
+
     return root;
 }
 
@@ -182,8 +202,14 @@ TREE E() {
     TREE Tr, TTr;
 
     Tr = T();
+    if(Tr==NULL){
+        return FAILED;
+    }
 
     TTr = TT();
+    if(TTr==NULL){
+        return FAILED;
+    }
 
     return makeNodeE(Tr, TTr);
 }
@@ -191,8 +217,14 @@ TREE E() {
 TREE T() {
     TREE F1, FT1;
     F1 = F();
+    if(F1==NULL){
+        return FAILED;
+    }
 
     FT1 = FT();
+    if(FT1==NULL){
+        return FAILED;
+    }
 
     return makeNodeT(F1, FT1);
 }
@@ -203,13 +235,27 @@ TREE TT() {
     if(*nextTerminal == '+'){
         nextTerminal++;
         T1 = T();
+        if(T1==NULL){
+            return FAILED;
+        }
         TT1 = TT();
+        if(TT1==NULL){
+            return FAILED;
+        }
         return makeNodeTT("+", T1, TT1);
     }
     if(*nextTerminal == '-'){
         nextTerminal++;
         T1 = T();
         TT1 = TT();
+        if(T1==NULL){
+            return FAILED;
+        }
+
+        if(TT1==NULL){
+            return FAILED;
+        }
+
         return makeNodeTT("-", T1, TT1);
     }
     else { //EMPTY STRING
@@ -223,13 +269,26 @@ TREE FT(){
     if(*nextTerminal == '*'){
         nextTerminal++;
         F1 = F();
+        if(F1==NULL){
+            return FAILED;
+        }
+
         FT1 = FT();
+        if(FT1==NULL){
+            return FAILED;
+        }
         return makeNodeFT("*", F1, FT1);
     }
     if(*nextTerminal == '/'){
         nextTerminal++;
         F1 = F();
+        if(FT==NULL){
+            return FAILED;
+        }
         FT1 = FT();
+        if(FT1==NULL){
+            return FAILED;
+        }
         return makeNodeFT("/", F1, FT1);
     }
     else { //EMPTY STRING
@@ -238,20 +297,30 @@ TREE FT(){
 }
 TREE F(){
     TREE T1;
-    if (*nextTerminal== '('){
+
+    if (*nextTerminal == '('){
         nextTerminal++;
         T1 = E();
+        if(T1 == NULL){
+            return FAILED;
+        }
         if (*nextTerminal== ')'){
             nextTerminal++;
             return makeNodeF("(", T1, ")");
         }
         else{
+            printf("FAILED!");
+
             return FAILED;
         }
     }
     else{
 
         T1 = N();
+        if(T1 == NULL){
+            return FAILED;
+        }
+
         return makeNodeFN(T1);
     }
 }
@@ -259,7 +328,11 @@ TREE F(){
 TREE N(){
     TREE D1, NT1;
     D1 = D();
+    if(D1 == NULL){
+        return FAILED;
+    }
     NT1 = NT();
+
     return makeNodeN(D1, NT1);
 }
 
@@ -328,7 +401,7 @@ TREE D(){
         return D1;
     }
     else{
-        *nextTerminal = 100;
+        printf("FAILED!");
         return FAILED;
     }
 }
