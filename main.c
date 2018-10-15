@@ -155,6 +155,9 @@ int main(int argc, char* args[]) {
         //but this is ok(?) because 32 + 4 doesn't work with this code
         //however 32 + 4+32 will work...
         scanf("%s", input); //depreciated but added ability to use depreciated functions
+        if(strcmp(input, "quit") == 0){
+            break;
+        }
         nextTerminal = input; //doesn't work with empty string or spaces
 
         //what does nextTerminal++ do?
