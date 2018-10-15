@@ -7,14 +7,56 @@
 
 typedef struct Node *TREE;
 
+
 struct Node {
     char* label;
     TREE leftmostChild, rightSibling;
 };
 
+struct Stack{
+    char* stack;
+    int top;
+};
+
+struct Stack* createStack(){
+    struct Stack* s = (struct Stack*)malloc(sizeof(struct Stack));
+    s->stack = (char*)malloc(sizeof(char*));
+    s->top = -1;
+    return s;
+}
+
+void push(struct Stack* s, char c){
+    s->top++;
+    s->stack[s->top] = c;
+}
+
+char pop(struct Stack* s){
+    char temp = s->stack[s->top];
+    s->stack[s->top]= -1;
+    s->top--;
+    return temp;
+}
+
+char peek(struct Stack* s){
+   return s->stack[s->top];
+}
+
+int isEmpty(struct Stack* s){
+    if(s->top == -1){
+        return 1;
+    }
+    return 0;
+}
+
+//not sure if free method is correct
+void free_Stack(struct Stack* s){
+    free(s);
+}
+
 char* nextTerminal;
 TREE parseTree;
 char** parseTable;
+int numTerminals;
 
 TREE E();
 TREE T();
@@ -49,17 +91,76 @@ TREE makeNodeD(char* x);
 
 TREE makeNodeChar(char* x);
 
+void parseTable_free(char** parseTable) {
+    for (int i = 0; i < numTerminals; i++)
+    {
+        free(parseTable[i]);
+    }
+    free(parseTable);
+    parseTable = NULL;
+}
 
+char** makeParseTable(char* input){
+    char** temp;
+    int duplicateCharacters = 0;
+    for(int i = 0; (unsigned) i < strlen(input) - 1; i++){
+        for(int j = i + 1; (unsigned) j < strlen(input); j++){
+            char first = input[i];
+            char second = input[j];
+//            printf("first: %c second: %c\n", first, second);
+
+            if(first == second && i != j){
+                duplicateCharacters++; //may be a possible problem if input is all same number (i.e. 333 makes tempCols = 0)
+            }
+        }
+    }
+    numTerminals = strlen(input)-duplicateCharacters;
+    temp = (char**)malloc(8*sizeof(char*)); //allocates 8 syntactic cateogries
+    printf("tempRows: %d ", 8);
+    for(int i=0; i<sizeof(input); i++){
+        temp[i] = (char*)malloc(numTerminals*sizeof(input)); //allocates # of cols by the length of the input aka Non-terminals
+    }
+    printf("tempCols: %d\n", numTerminals);
+
+    //finished allocating memory for the parseTable
+    //need to fill in explicit parse table;
+
+//    char**parseTable;
+//    parseTable = (char**) malloc(sizeof(char*));
+    return temp;
+}
+
+//IF THE INPUT IS NOT WELL-FORMED, THE PARSER SHOULD PRINT AN APPROPRIATE MESSAGE AND RESUME PROCESSING AT THE NEXT LINE OF INPUT
+//(I.E. SKIP TO THE NEXT NEW LINE)
 
 int main(int argc, char* args[]) {
+//    struct Stack* s = createStack();
+//    printf("s.top: %d\n", s->top);
+//    push(s, 'f');
+//    printf("s.top: %d\n", s->top);
+//    push(s, 'a');
+//    printf("s.top: %d\n", s->top);
+//    printf("pop: %c s.top: %d\n", pop(s), s->top);
+//    printf("peek: %c\n", peek(s));
+//    printf("isEmpty: %d\n", isEmpty(s));
+//    printf("pop: %c s.top: %d\n", pop(s), s->top);
+//    printf("s->top: %d\n", s->top);
+//    printf("isEmpty: %d\n", isEmpty(s));
+//    free_Stack(s);
+
     char input[256] = "";
     while (strcmp(input, "quit") != 0) {
-        printf("Enter an expression to construct a parse tree using a recursive-descent parser:");
+        printf("Enter an expression to construct a parse tree using a recursive-descent parser (\"quit\" to quit):");
         //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
         //but this is ok(?) because 32 + 4 doesn't work with this code
         //however 32 + 4+32 will work...
         scanf("%s", input); //depreciated but added ability to use depreciated functions
         nextTerminal = input; //doesn't work with empty string or spaces
+
+        //what does nextTerminal++ do?
+
+//        printf("nextTerminal: %s \n", nextTerminal);
+        parseTable = makeParseTable(input);
         parseTree = E();
         if (*nextTerminal == '\0') {
             printTree(parseTree);
@@ -67,17 +168,13 @@ int main(int argc, char* args[]) {
             printf("FAILED!\n");
         }
         free(parseTree);
+        free(parseTable);
     }
     return 0;
 }
 
 
 
-char** makeParseTable(){
-    char**parseTable;
-    parseTable = (char**) malloc(sizeof(char*));
-    return parseTable;
-}
 
 
 
@@ -431,8 +528,6 @@ void printTree(TREE root){
 
 void printTreeRecursively(TREE root, int indent){
     char* label;
-    printf("PRINTING");
-
     //label = (char*) malloc((indent+5)*sizeof(char));
     label = root->label;
     for(int i = 0; i<indent-1; i++){
