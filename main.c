@@ -50,17 +50,14 @@ TREE makeNodeChar(char* x);
 
 
 int main(int argc, char* args[]) {
-    nextTerminal = "700*42+(42)-4";
+    nextTerminal = "";
     parseTree = E();
     if(*nextTerminal == '\0'){
         printTree(parseTree);
     }
     else{
-        printf("FAILED");
+        printf("FAILED!");
     }
-    printf("REACHED");
-
-
     free(parseTree);
 }
 
@@ -206,20 +203,20 @@ TREE makeNodeChar(char* x){
 
 
 TREE E() {
-    TREE Tr, TTr;
-    printf("REACH");
+    TREE T1, TT1;
 
-    Tr = T();
-    if(Tr==NULL){
+    T1 = T();
+
+    if(T1==NULL){
         return FAILED;
     }
 
-    TTr = TT();
-    if(TTr==NULL){
+    TT1 = TT();
+    if(TT1==NULL){
         return FAILED;
     }
 
-    return makeNodeE(Tr, TTr);
+    return makeNodeE(T1, TT1);
 }
 
 TREE T() {
@@ -259,7 +256,6 @@ TREE TT() {
         if(T1==NULL){
             return FAILED;
         }
-
         if(TT1==NULL){
             return FAILED;
         }
@@ -317,7 +313,6 @@ TREE F(){
             return makeNodeF("(", T1, ")");
         }
         else{
-            printf("FAILED!");
 
             return FAILED;
         }
@@ -409,7 +404,6 @@ TREE D(){
         return D1;
     }
     else{
-        printf("FAILED!");
         return FAILED;
     }
 }
@@ -438,7 +432,7 @@ void printTreeRecursively(TREE root, int indent){
     printf("%s", label);
     printf("\n");
     if(root->leftmostChild!=NULL){
-        printTreeRecursively(root->leftmostChild, indent + 4);
+        printTreeRecursively(root->leftmostChild, indent + 3);
     }
     if(root->rightSibling!=NULL){
         printTreeRecursively(root->rightSibling, indent);
