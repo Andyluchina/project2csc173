@@ -11,7 +11,7 @@ struct Node {
 };
 
 char* nextTerminal;
-TREE parseTREE;
+TREE parseTree;
 
 TREE E();
 TREE T();
@@ -49,7 +49,7 @@ TREE makeNodeChar(char* x);
 
 int main(int argc, char* args[]) {
     nextTerminal = "32+4";
-    TREE parseTree = E();
+    parseTree = E();
     printTree(parseTree);
     TREE test = makeNodeChar("x");
     printTree (test);
@@ -255,8 +255,6 @@ TREE F(){
 TREE N(){
     TREE D1, NT1;
     D1 = D();
-    printf("reach");
-
     NT1 = NT();
     return makeNodeN(D1, NT1);
 }
