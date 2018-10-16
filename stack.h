@@ -13,9 +13,9 @@ struct Stack* createStack(){
     return s;
 };
 
-void push(struct Stack* s, char c){
+void push(struct Stack* s, char* c){
     s->top++;
-    s->stack[s->top] = c;
+    s->stack[s->top] = *c;
 };
 
 char pop(struct Stack* s){
@@ -35,6 +35,10 @@ int isEmpty(struct Stack* s){
     }
     return 0;
 };
+
+int size(struct Stack* s){
+    return s->top;
+}
 
 //not sure if free method is correct
 void free_Stack(struct Stack* s){
