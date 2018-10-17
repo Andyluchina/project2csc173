@@ -14,6 +14,52 @@ struct Node {
     TREE leftmostChild, rightSibling;
 };
 
+//
+// Created by Andy on 10/15/2018.
+// Refactored header file: a working stack! you are welcome!
+
+struct Stack2
+{
+    int top;
+    unsigned capacity;
+    TREE* TreeArray;
+};
+
+// function to create a stack2 of given capacity. It initializes size of 
+// stack2 as 0 
+struct Stack2* createStack2(unsigned capacity)
+{
+    struct Stack2* stack2 = (struct Stack2*) malloc(sizeof(struct Stack2));
+    stack2->capacity = capacity;
+    stack2->top = -1;
+    stack2->TreeArray = (TREE*) malloc(stack2->capacity * sizeof(TREE));
+    return stack2;
+}
+
+// stack2 is empty when top is equal to -1 
+int isEmpty2(struct Stack2* stack2)
+{   return stack2->top == -1;  }
+
+// Function to add an item to stack2.  It increases top by 1 
+void push2(struct Stack2* stack2, TREE item)
+{
+    stack2->TreeArray[++stack2->top] = item;
+}
+
+// Function to remove an item from stack2.  It decreases top by 1 
+TREE pop2(struct Stack2* stack2)
+{
+    return stack2->TreeArray[stack2->top--];
+}
+int size2(struct Stack2* s2){
+    return s2->top;
+}
+
+#ifndef PROJECT2CSC173_STACK_H
+#define PROJECT2CSC173_STACK_H
+
+#endif //PROJECT2CSC173_STACK_H
+
 char* nextTerminal;
 char currentCategory;
 TREE parseTree;
@@ -29,11 +75,17 @@ TREE N();
 TREE D();
 TREE NT();
 
+void freeTree(TREE node);
+
 void printTree(TREE root);
 void printTreeRecursively(TREE root, int indent);
 int IsCharDigit(char c);
 
+float evalParseTree(TREE root);
+
 TREE makeNodeE(TREE T, TREE TT);
+
+TREE makeNodeEmpty(char* label);
 
 TREE makeNodeT(TREE F, TREE FT);
 
@@ -53,6 +105,17 @@ TREE makeNodeD(char* x);
 
 TREE makeNodeChar(char* x);
 
+//PART THREE DECLARATIONS
+char* concat(const char*, const char*);
+void printleaves(TREE root);
+void parseN(TREE root);
+void stripParenthesis(TREE root);
+float evalE(TREE root);
+float Fhandler(TREE root);
+float Thandler(TREE root);
+float EvaluateParseTree(TREE root);
+
+
 void parseTable_free(char** parseTable) {
     for (int i = 0; i < numTerminals; i++)
     {
@@ -66,116 +129,107 @@ char lookAhead(char* input){
     return input[1];
 }
 
-void makeParseTable(){
-    //0: 0-9
-    //1: "+"
-    //2: "-"
-    //3: "*"
-    //4: "/"
-    //5: "$"
-    //6: "("
-    //7: ")"
-
-    parseTable[0][0] = "RT"; //written in reverse so push in order of char(0), char(1)
-    parseTable[0][1] = "RT";
-    parseTable[0][2] = "RT";
-    parseTable[0][3] = "RT";
-    parseTable[0][4] = "RT";
-    parseTable[0][5] = "RT";
-    parseTable[0][6] = "RT";
-    parseTable[0][7] = "RT";
-    parseTable[0][8] = "RT";
-    parseTable[0][9] = "RT";
+void makeParseTable(){ //FUNCTION TO MAKE PARSE TABLE
+    parseTable[0][0] = "ZRT"; //written in reverse so push in order of char(0), char(1)
+    parseTable[0][1] = "ZRT";
+    parseTable[0][2] = "ZRT";
+    parseTable[0][3] = "ZRT";
+    parseTable[0][4] = "ZRT";
+    parseTable[0][5] = "ZRT";
+    parseTable[0][6] = "ZRT";
+    parseTable[0][7] = "ZRT";
+    parseTable[0][8] = "ZRT";
+    parseTable[0][9] = "ZRT";
     parseTable[0][10] = "K"; //K is error
     parseTable[0][11] = "K";
     parseTable[0][12] = "K";
     parseTable[0][13] = "K";
     parseTable[0][14] = "K";
-    parseTable[0][15] = "RT";
+    parseTable[0][15] = "ZRT";
     parseTable[0][16] = "K";
 
-    parseTable[1][0] = "K"; //"P" (meaning pop) is equivalent to epsilon
-    parseTable[1][1] = "K";
-    parseTable[1][2] = "K";
-    parseTable[1][3] = "K";
-    parseTable[1][4] = "K";
-    parseTable[1][5] = "K";
-    parseTable[1][6] = "K";
-    parseTable[1][7] = "K";
-    parseTable[1][8] = "K";
-    parseTable[1][9] = "K";
-    parseTable[1][10] = "+RT";
-    parseTable[1][11] = "-RT";
-    parseTable[1][12] = "K";
-    parseTable[1][13] = "K";
-    parseTable[1][14] = "P"; //not sure how to represent this yet
-    parseTable[1][15] = "K";
-    parseTable[1][16] = "P";
+    parseTable[1][0] = "QP"; //"QP" (meaning pop) is equivalent to epsilon
+    parseTable[1][1] = "QP";
+    parseTable[1][2] = "QP";
+    parseTable[1][3] = "QP";
+    parseTable[1][4] = "QP";
+    parseTable[1][5] = "QP";
+    parseTable[1][6] = "QP";
+    parseTable[1][7] = "QP";
+    parseTable[1][8] = "QP";
+    parseTable[1][9] = "QP";
+    parseTable[1][10] = "XRT+";
+    parseTable[1][11] = "XRT-";
+    parseTable[1][12] = "QP";
+    parseTable[1][13] = "QP";
+    parseTable[1][14] = "QP"; //not sure how to represent this yet
+    parseTable[1][15] = "QP";
+    parseTable[1][16] = "QP";
 
-    parseTable[2][0] = "YF"; //0-9
-    parseTable[2][1] = "YF";
-    parseTable[2][2] = "YF";
-    parseTable[2][3] = "YF";
-    parseTable[2][4] = "YF";
-    parseTable[2][5] = "YF";
-    parseTable[2][6] = "YF";
-    parseTable[2][7] = "YF";
-    parseTable[2][8] = "YF";
-    parseTable[2][9] = "YF";
+    parseTable[2][0] = "CYF"; //0-9
+    parseTable[2][1] = "CYF";
+    parseTable[2][2] = "CYF";
+    parseTable[2][3] = "CYF";
+    parseTable[2][4] = "CYF";
+    parseTable[2][5] = "CYF";
+    parseTable[2][6] = "CYF";
+    parseTable[2][7] = "CYF";
+    parseTable[2][8] = "CYF";
+    parseTable[2][9] = "CYF";
     parseTable[2][10] = "K"; //+
     parseTable[2][11] = "K"; //-
     parseTable[2][12] = "K"; //*
     parseTable[2][13] = "K"; // /
     parseTable[2][14] = "K"; // $
-    parseTable[2][15] = "YF"; // (
+    parseTable[2][15] = "CYF"; // (
     parseTable[2][16] = "K"; // )
 
-    parseTable[3][0] = "K";
-    parseTable[3][1] = "K";
-    parseTable[3][2] = "K";
-    parseTable[3][3] = "K";
-    parseTable[3][4] = "K";
-    parseTable[3][5] = "K";
-    parseTable[3][6] = "K";
-    parseTable[3][7] = "K";
-    parseTable[3][8] = "K";
-    parseTable[3][9] = "K";
-    parseTable[3][10] = "P";
-    parseTable[3][11] = "P";
-    parseTable[3][12] = "*YF";
-    parseTable[3][13] = "/YF";
-    parseTable[3][14] = "K";
-    parseTable[3][15] = "K";
-    parseTable[3][16] = "K";
+    parseTable[3][0] = "LP";
+    parseTable[3][1] = "LP";
+    parseTable[3][2] = "LP";
+    parseTable[3][3] = "LP";
+    parseTable[3][4] = "LP";
+    parseTable[3][5] = "LP";
+    parseTable[3][6] = "LP";
+    parseTable[3][7] = "LP";
+    parseTable[3][8] = "LP";
+    parseTable[3][9] = "LP";
+    parseTable[3][10] = "LP";
+    parseTable[3][11] = "LP";
+    parseTable[3][12] = "VYF*";
+    parseTable[3][13] = "VYF/";
+    parseTable[3][14] = "LP";
+    parseTable[3][15] = "LP";
+    parseTable[3][16] = "LP";
 
-    parseTable[4][0] = "N"; //0-9
-    parseTable[4][1] = "N";
-    parseTable[4][2] = "N";
-    parseTable[4][3] = "N";
-    parseTable[4][4] = "N";
-    parseTable[4][5] = "N";
-    parseTable[4][6] = "N";
-    parseTable[4][7] = "N";
-    parseTable[4][8] = "N";
-    parseTable[4][9] = "N";
+    parseTable[4][0] = "BN"; //0-9
+    parseTable[4][1] = "BN";
+    parseTable[4][2] = "BN";
+    parseTable[4][3] = "BN";
+    parseTable[4][4] = "BN";
+    parseTable[4][5] = "BN";
+    parseTable[4][6] = "BN";
+    parseTable[4][7] = "BN";
+    parseTable[4][8] = "BN";
+    parseTable[4][9] = "BN";
     parseTable[4][10] = "K"; //+
     parseTable[4][11] = "K"; //-
     parseTable[4][12] = "K"; //*
     parseTable[4][13] = "K"; // /
     parseTable[4][14] = "K"; // $
-    parseTable[4][15] = ")E("; // ( //<N> OR (<E>) NOT SURE YET HOW TO REPRESENT
+    parseTable[4][15] = "H)E("; // ( //<N> OR (<E>) NOT SURE YET HOW TO REPRESENT
     parseTable[4][16] = "K"; // )
 
-    parseTable[5][0] = "MD"; //0-9
-    parseTable[5][1] = "MD";
-    parseTable[5][2] = "MD";
-    parseTable[5][3] = "MD";
-    parseTable[5][4] = "MD";
-    parseTable[5][5] = "MD";
-    parseTable[5][6] = "MD";
-    parseTable[5][7] = "MD";
-    parseTable[5][8] = "MD";
-    parseTable[5][9] = "MD";
+    parseTable[5][0] = "JMD"; //0-9
+    parseTable[5][1] = "JMD";
+    parseTable[5][2] = "JMD";
+    parseTable[5][3] = "JMD";
+    parseTable[5][4] = "JMD";
+    parseTable[5][5] = "JMD";
+    parseTable[5][6] = "JMD";
+    parseTable[5][7] = "JMD";
+    parseTable[5][8] = "JMD";
+    parseTable[5][9] = "JMD";
     parseTable[5][10] = "K"; //+
     parseTable[5][11] = "K"; //-
     parseTable[5][12] = "K"; //*
@@ -184,34 +238,34 @@ void makeParseTable(){
     parseTable[5][15] = "K"; // (
     parseTable[5][16] = "K"; // )
 
-    parseTable[6][0] = "N"; //0-9
-    parseTable[6][1] = "N";
-    parseTable[6][2] = "N";
-    parseTable[6][3] = "N";
-    parseTable[6][4] = "N";
-    parseTable[6][5] = "N";
-    parseTable[6][6] = "N";
-    parseTable[6][7] = "N";
-    parseTable[6][8] = "N";
-    parseTable[6][9] = "N";
-    parseTable[6][10] = "K"; //+
-    parseTable[6][11] = "K"; //-
-    parseTable[6][12] = "P"; //*
-    parseTable[6][13] = "P"; // /
-    parseTable[6][14] = "K"; // $
-    parseTable[6][15] = "K"; // (
-    parseTable[6][16] = "K"; // )
+    parseTable[6][0] = "ON"; //0-9
+    parseTable[6][1] = "ON";
+    parseTable[6][2] = "ON";
+    parseTable[6][3] = "ON";
+    parseTable[6][4] = "ON";
+    parseTable[6][5] = "ON";
+    parseTable[6][6] = "ON";
+    parseTable[6][7] = "ON";
+    parseTable[6][8] = "ON";
+    parseTable[6][9] = "ON";
+    parseTable[6][10] = "SP"; //+
+    parseTable[6][11] = "SP"; //-
+    parseTable[6][12] = "SP"; //*
+    parseTable[6][13] = "SP"; // /
+    parseTable[6][14] = "SP"; // $
+    parseTable[6][15] = "SP"; // (
+    parseTable[6][16] = "SP"; // )
 
-    parseTable[7][0] = "0"; //0-9
-    parseTable[7][1] = "1";
-    parseTable[7][2] = "2";
-    parseTable[7][3] = "3";
-    parseTable[7][4] = "4";
-    parseTable[7][5] = "5";
-    parseTable[7][6] = "6";
-    parseTable[7][7] = "7";
-    parseTable[7][8] = "8";
-    parseTable[7][9] = "9";
+    parseTable[7][0] = "U0"; //0-9
+    parseTable[7][1] = "U1";
+    parseTable[7][2] = "U2";
+    parseTable[7][3] = "U3";
+    parseTable[7][4] = "U4";
+    parseTable[7][5] = "U5";
+    parseTable[7][6] = "U6";
+    parseTable[7][7] = "U7";
+    parseTable[7][8] = "U8";
+    parseTable[7][9] = "U9";
     parseTable[7][10] = "K"; //+
     parseTable[7][11] = "K"; //-
     parseTable[7][12] = "K"; //*
@@ -219,40 +273,10 @@ void makeParseTable(){
     parseTable[7][14] = "K"; // $
     parseTable[7][15] = "K"; // (
     parseTable[7][16] = "K"; // )
-
-//    int duplicateCharacters = 0;
-//    for(int i = 0; (unsigned) i < strlen(input) - 1; i++){
-//        for(int j = i + 1; (unsigned) j < strlen(input); j++){
-//            char first = input[i];
-//            char second = input[j];
-////            printf("first: %c second: %c\n", first, second);
-//
-//            if(first == second && i != j){
-//                duplicateCharacters++; //may be a possible problem if input is all same number (i.e. 333 makes tempCols = 0)
-//            }
-//        }
-//    }
-
-
-//    numTerminals = 8;
-//    temp = (char**)malloc(8*sizeof(char*)); //allocates 8 syntactic cateogries
-//    printf("tempRows: %d ", 8);
-//    for(int i=0; i<sizeof(input); i++){
-//        temp[i] = (char*)malloc(numTerminals*sizeof(input)); //allocates # of cols by the length of the input aka Non-terminals
-//    }
-//    printf("tempCols: %d\n", numTerminals);
-
-
-    //finished allocating memory for the parseTable
-    //need to fill in explicit parse table;
-
-//    char**parseTable;
-//    parseTable = (char**) malloc(sizeof(char*));
-
 }
 
-char* getProduction(char* character, char* category){
-    printf("GP character: %c category: %c\n", *character, *category);
+char* getProduction(const char* character, const char* category){
+   // printf("GP character: %c category: %c\n", *character, *category);
     if(*category == 'E'){ //<E>
         if(*character == '0' || *character == '1' || *character == '2' || *character == '3' || *character == '4' || *character == '5'
            || *character == '6' || *character == '7' || *character == '8' || *character == '9'){
@@ -502,7 +526,7 @@ int isTerminal(char* next){
     if((strcmp(next, "0") == 0) || (strcmp(next, "1")) == 0 || (strcmp(next, "2")) == 0 || (strcmp(next, "3")) == 0 ||
        (strcmp(next, "4")) == 0 || (strcmp(next, "5")) == 0 || (strcmp(next, "6")) == 0 || (strcmp(next, "7")) == 0 || (strcmp(next, "8")) == 0
        || (strcmp(next, "9")) == 0 || (strcmp(next, "+")) == 0 || (strcmp(next, "-")) == 0 || (strcmp(next, "*")) == 0 || (strcmp(next, "/")) == 0
-       || (strcmp(next, "(")) == 0 || (strcmp(next, ")")) == 0) {
+       || (strcmp(next, "(")) == 0 || (strcmp(next, "$")) == 0 || (strcmp(next, ")")) == 0) {
         return 1234567890;
     }
     return 0;
@@ -510,7 +534,7 @@ int isTerminal(char* next){
 
 int isTerminalChar(char next){
     if(next == '0' || next == '1' || next == '2' || next == '3' || next == '4' || next == '5' || next == '6' || next == '7'
-       || next == '8' || next == '9' || next == '+' || next == '-' || next == '*' || next == '/' || next == '(' || next == ')'){
+       || next == '8' || next == '9' || next == '+' || next == '-' || next == '*' || next == '/' || next == '(' || next == ')' || next == '$') {
         return 1234567890;
     }
 
@@ -519,68 +543,199 @@ int isTerminalChar(char next){
 
 
 //currently infinitely loops because <D> maps to <D>... need to map each to an individual number
-TREE tableDrivenParser(char* input){
+TREE tableDrivenParser(){
     struct Stack* s = createStack();
+    struct Stack2* s2 = createStack2(30);
+    char current = nextTerminal[0];
+
+
     push(s, "$"); //$ is end marker
     printf("pushed $\n");
     push(s, "E"); //<E>
-    printf("pushed E\n");
+    printf("pushed"
+           ""
+           ""
+           ""
+           " E\n");
 
 
-    while(!isEmpty(s) && strlen(input) > 0){
-        printf("strlen(input): %d, input: %s\n", strlen(input), input);
-
+    while(!isEmpty(s) || strlen(nextTerminal) > 0){
+        printf("nextTerminal: %s stack2 size: %d \n", nextTerminal, size2(s2));
+        current = *nextTerminal;
         char popped = pop(s);
-        char current = input[0];
-        char next = lookAhead(input);
+        printf("popped: %c stackSize: %d current: %c \n", popped, size(s), current);
 
+        if(popped == '$'){
 
-
-        printf("popped: %c stackSize: %d current: %c next: %c\n", popped, size(s), current, next);
-        char* currentProduction = getProduction(&current, &popped);;
-
-
-        if(strcmp(currentProduction, "false") != 0){
-            for(int i = 0; (unsigned) i < strlen(currentProduction); i++){
-                if(currentProduction[i] == 'K'){ //means that it is an error
-                    break;
-                    //possible return NULL;
-                }else if(currentProduction[i] == '$'){//should mean end of stack
-                    char pop$ = pop(s);
-                    printf("popping $: %c\n", pop$);
-                }else if(currentProduction[i] == 'P') {//should be equal to an empty string
-                    printf("currentProduction[i]: %c\n", currentProduction[i]);
-                    char losingChar = pop(s); //I think in this method it pops too much if condition must check if its P and not a category
-                    printf("popping without pushing: %c\n", losingChar);
-                }else if(isTerminal(&currentProduction[i]) == 1234567890){
-                    printf("currentProduction: %s\n", currentProduction);
-                    push(s, &currentProduction[i]);
-                    printf("pushing Terminal: %s\n", &currentProduction[i]);
-                    if(current == currentProduction[i]){
-                        printf("current == popped\n");
-                        pop(s);
-                    }
-                    input++;
-
-                }else{
-                    push(s, &currentProduction[i]);
-                    printf("pushing: %s\n", &currentProduction[i]);
-                    printf("stack Size: %d\n", size(s));
-                }
-
+        }
+        else if((isTerminalChar(popped)) == 1234567890){
+            //FOR EACH ADD IF STATEMENT AND PUSH
+            if(popped == '0'){
+                push2(s2, makeNodeChar("0"));
             }
+            else if(popped == '1'){
+                push2(s2, makeNodeChar("1"));
+            }
+            else if(popped == '2'){
+                push2(s2, makeNodeChar("2"));
+            }
+            else if(popped == '3'){
+                push2(s2, makeNodeChar("3"));
+            }
+            else if(popped == '4'){
+                push2(s2, makeNodeChar("4"));
+            }
+            else if(popped == '5'){
+                push2(s2, makeNodeChar("5"));
+            }
+            else if(popped == '6'){
+                push2(s2, makeNodeChar("6"));
+            }
+            else if(popped == '7'){
+                push2(s2, makeNodeChar("7"));
+            }
+            else if(popped == '8'){
+                push2(s2, makeNodeChar("8"));
+            }
+            else if(popped == '9'){
+                push2(s2, makeNodeChar("9"));
+            }
+            else if(popped == '('){
+                push2(s2, makeNodeChar("("));
+            }
+            else if(popped == ')'){
+                push2(s2, makeNodeChar(")"));
+            }
+            else if(popped == '+'){
+                push2(s2, makeNodeChar("+"));
+            }
+            else if(popped == '-'){
+                push2(s2, makeNodeChar("-"));
+            }
+            else if(popped == '/'){
+                push2(s2, makeNodeChar("/"));
+            }
+            else if(popped == '*'){
+                push2(s2, makeNodeChar("*"));
+            }
+        }
+        printf("\n\n");
 
-        }else{
-            printf("NOT A VALID ENTRY\n");
-            break;
+        if (current == '$' && popped == '$') { //IF WE DID IT
+            nextTerminal++;
+            printf("Parsed\n");
+            return pop2(s2);
+        }
+        else if((isTerminalChar(popped)) == 1234567890 ){ //IF THE POPPED IS A TERMINAL
+            if(popped == current){
+                nextTerminal++;
+            }
+            else{
+                printf("FAILED!");
+                return NULL;
+            }
         }
 
-        printf("strlen2(input): %d, input: %s\n\n", strlen(input), input);
+        //IF THE POPPED IS ACTION CHARACTER IS POPPED FOR CREATING THE PARSE TREE
+        else if(popped =='U'){ //<D> production
+            TREE numTree = pop2(s2);
+            char*num = numTree->label;
+            TREE t = makeNodeD(num);
+            push2(s2, t);
+        }
+        else if(popped == 'Z'){ //THIS IS <E>
+            TREE TT = pop2(s2);
+            TREE T = pop2(s2);
+            TREE pop = makeNodeE(T, TT);
+            push2(s2, pop);
+        }
+        else if(popped =='X'){ //THIS IS <TT>
+
+            TREE TT = pop2(s2);
+            TREE T = pop2(s2);
+            TREE cha = pop2(s2);
+            char* x =  cha->label;
+            TREE pop = makeNodeTT(x, T, TT);
+            push2(s2, pop);
+        }
+        else if(popped =='Q'){ //THIS IS <TT> with epsilon
+            push2(s2, makeNodeEmpty("<TT>"));
+        }
+        else if(popped =='C'){ // This is <T>
+            TREE FT = pop2(s2);
+            TREE F = pop2(s2);
+            TREE pop= makeNodeT(F,FT);
+            push2(s2, pop);
+        }
+        else if(popped =='V'){ // This is <FT>
+
+            TREE TT = pop2(s2);
+            TREE T = pop2(s2);
+            TREE cha = pop2(s2);
+            char* x =  cha->label;
+            TREE pop = makeNodeFT(x, T, TT);
+            push2(s2, pop);
+        }
+        else if(popped =='L'){ //This is <FT> with epsilon production
+           // TREE po= pop2(s2);
+           // printTree(po);
+            push2(s2, makeNodeEmpty("<FT>"));
+        }
+        else if(popped =='B'){ //This is <F> with <N> prodcution
+            TREE n = pop2(s2);
+            push2(s2, makeNodeFN(n));
+        }
+        else if(popped =='H'){ //This is <F> with (E) production
+            TREE cha = pop2(s2);
+            char* right =  cha->label;
+            TREE E = pop2(s2);
+            TREE cha2 = pop2(s2);
+            char* left =  cha2->label;
+            TREE pop = makeNodeF(left, E, right);
+            push2(s2, pop);
+        }
+        else if(popped == 'J'){ // <N> production
+            TREE NT = pop2(s2);
+            TREE D = pop2(s2);
+            push2(s2, makeNodeN(D, NT));
+        }
+        else if(popped =='O'){ // <NT> production
+            TREE N = pop2(s2);
+            push2(s2, makeNodeNT(N));
+        }
+        else if(popped =='S'){ //<NT> epsilon prduction
+            push2(s2, makeNodeEmpty("<NT>"));
+        }
+
+        else { //IF THE POPPED IS A SYNTACTIC CATEGORY
+            char* currentProduction = getProduction(&current, &popped);
+            if( strcmp(currentProduction, "K") ==0){
+                printf("FAILED!");
+                return NULL;
+            }
+            if (strcmp(currentProduction, "false") != 0) {
+                for (int i = 0; (unsigned) i < strlen(currentProduction); i++) {
+                    if (currentProduction[i] == 'K') { //means that it is an error
+                        return NULL;
+                    } else if (currentProduction[i] == 'P') {//should be equal to an empty string
+                    } else {
+                        push(s, &currentProduction[i]);
+                    }
+
+                }
+
+            } else {
+                free_Stack(s);
+                free(s2->TreeArray);
+                free(s2);
+
+
+                printf("NOT A VALID ENTRY\n");
+                break;
+            }
+        }
     }
     printf("END WHILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-
-
-//        char* nextProduction = getProduction(next, popped);
 
 
     printf("-----------------------------------------------------\n");
@@ -592,26 +747,31 @@ TREE tableDrivenParser(char* input){
 //(I.E. SKIP TO THE NEXT NEW LINE)
 
 int main(int argc, char* args[]) {
-//    struct Stack* s = createStack();
-//    printf("s.top: %d\n", s->top);
-//    push(s, 'f');
-//    printf("s.top: %d\n", s->top);
-//    push(s, 'a');
-//    printf("s.top: %d\n", s->top);
-//    printf("pop: %c s.top: %d\n", pop(s), s->top);
-//    printf("peek: %c\n", peek(s));
-//    printf("isEmpty: %d\n", isEmpty(s));
-//    printf("pop: %c s.top: %d\n", pop(s), s->top);
-//    printf("s->top: %d\n", s->top);
-//    printf("isEmpty: %d\n", isEmpty(s));
-//    free_Stack(s);
 
-//    struct Stack *stack = createStack();
-//    push(stack, 'c');
-//    printf("%c\n", pop(stack));
-//    free_Stack(stack);
 
     char input[256] = "";
+    char input2[256] = "";
+    printf("Now testing the table driven parser... \n");
+    while (strcmp(input2, "quit") != 0) {
+        printf("Enter an expression to construct a parse tree using a TABLE-DRIVEN PARSER(\"quit\" to quit):");
+        //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
+        //but this is ok(?) because 32 + 4 doesn't work with this code
+        //however 32 + 4+32 will work...
+        scanf("%s", input2); //depreciated but added ability to use depreciated functions
+        if(strcmp(input2, "quit") == 0){
+            break;
+        }
+        nextTerminal = strcat(input2, "$"); //doesn't work with empty string or spaces
+
+//        printf("nextTerminal: %s \n", nextTerminal);
+        makeParseTable();
+        TREE parseTree2 = tableDrivenParser();
+        if (*nextTerminal == '\0' && parseTree2 != NULL) {
+            printTree(parseTree2);
+            printf("THE TREE ANSWER: %f \n", EvaluateParseTree(parseTree2));
+        } else {
+        }
+    }
     while (strcmp(input, "quit") != 0) {
         printf("Enter an expression to construct a parse tree using a recursive-descent parser (\"quit\" to quit):");
         //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
@@ -621,21 +781,19 @@ int main(int argc, char* args[]) {
         if(strcmp(input, "quit") == 0){
             break;
         }
-        nextTerminal = input; //doesn't work with empty string or spaces
-
-        //what does nextTerminal++ do?
+        nextTerminal = strcat(input, "");
 
 //        printf("nextTerminal: %s \n", nextTerminal);
-        makeParseTable();
-        //parseTree = E();
-        parseTree = tableDrivenParser(input);
-        if (*nextTerminal == '\0') {
+        //makeParseTable();
+        parseTree = E();
+       // parseTree = tableDrivenParser(input);
+        if (*nextTerminal == '\0' && parseTree != NULL) {
             printTree(parseTree);
+            printf("THE TREE ANSWER: %f \n", EvaluateParseTree(parseTree));
+
         } else {
             printf("FAILED!\n");
         }
-        free(parseTree);
-        free(parseTable);
     }
     return 0;
 }
@@ -652,6 +810,7 @@ TREE makeNodeE(TREE T, TREE TT){
 
     root->leftmostChild = T;
     root->rightSibling = NULL;
+
     T->rightSibling = TT;
     return root;
 }
@@ -662,6 +821,8 @@ TREE makeNodeT(TREE F, TREE FT){
     root->label = "<T>";
 
     root->leftmostChild = F;
+    root->rightSibling = NULL;
+
     F->rightSibling = FT;
     return root;
 }
@@ -689,7 +850,10 @@ TREE makeNodeF(char* x, TREE E, char* x2){
 
     TREE leftmostChild = makeNodeChar(x);
     leftmostChild->rightSibling = E;
+    leftmostChild->leftmostChild = NULL;
+
     root->leftmostChild = leftmostChild;
+    root->rightSibling = NULL;
 
     E->rightSibling= makeNodeChar(x2);
 
@@ -750,9 +914,9 @@ TREE makeNodeD(char* x){
     root->label ="<D>";
 
     root->leftmostChild = makeNodeChar(x);
+    root->rightSibling = NULL;
     return root;
 }
-
 
 
 TREE makeNodeEmpty(char* label){
@@ -777,11 +941,11 @@ TREE makeNodeChar(char* x){
 }
 
 
+
 TREE E() {
     TREE T1, TT1;
 
     T1 = T();
-
     if(T1==NULL){
         return FAILED;
     }
@@ -796,6 +960,7 @@ TREE E() {
 
 TREE T() {
     TREE F1, FT1;
+
     F1 = F();
     if(F1==NULL){
         return FAILED;
@@ -827,10 +992,10 @@ TREE TT() {
     if(*nextTerminal == '-'){
         nextTerminal++;
         T1 = T();
-        TT1 = TT();
         if(T1==NULL){
             return FAILED;
         }
+        TT1 = TT();
         if(TT1==NULL){
             return FAILED;
         }
@@ -861,7 +1026,7 @@ TREE FT(){
     if(*nextTerminal == '/'){
         nextTerminal++;
         F1 = F();
-        if(FT==NULL){
+        if(F1==NULL){
             return FAILED;
         }
         FT1 = FT();
@@ -876,7 +1041,6 @@ TREE FT(){
 }
 TREE F(){
     TREE T1;
-
     if (*nextTerminal == '('){
         nextTerminal++;
         T1 = E();
@@ -893,7 +1057,6 @@ TREE F(){
         }
     }
     else{
-
         T1 = N();
         if(T1 == NULL){
             return FAILED;
@@ -905,11 +1068,15 @@ TREE F(){
 
 TREE N(){
     TREE D1, NT1;
+
     D1 = D();
     if(D1 == NULL){
         return FAILED;
     }
     NT1 = NT();
+    if(NT1 == NULL){
+        return FAILED;
+    }
 
     return makeNodeN(D1, NT1);
 }
@@ -918,6 +1085,9 @@ TREE NT(){
     TREE t1;
     if(IsCharDigit(*nextTerminal) == 1){
         t1 = N();
+        if(t1 == NULL){
+            return FAILED;
+        }
         return makeNodeNT(t1);
     }
     else{
@@ -991,13 +1161,133 @@ int IsCharDigit(char c) {
     return 0;
 }
 
+//this is part3
+float EvaluateParseTree(TREE root){
+    parseN(root);
+    stripParenthesis(root);
+    return evalE(root);
+}
+
+
+float evalE(TREE root){
+    return Thandler(root->leftmostChild);
+}
+
+float Fhandler(TREE root){
+    if(strcmp(root->rightSibling->leftmostChild->label,"e")==0){
+        //don't have a sign
+        if(strcmp(root->leftmostChild->label,"<E>")==0){
+            return evalE(root->leftmostChild);
+        }else{
+            return atof(root->leftmostChild->label);
+        }
+    }else{
+        //have a sign
+        if(strcmp(root->leftmostChild->label,"<E>")==0){
+            if(strcmp(root->rightSibling->leftmostChild->label,"*")==0){
+                //*
+                return evalE(root->leftmostChild) * Fhandler(root->rightSibling->leftmostChild->rightSibling);
+            }else{
+                //going to be /
+                return evalE(root->leftmostChild) / Fhandler(root->rightSibling->leftmostChild->rightSibling);
+            }
+        }else{
+            if(strcmp(root->rightSibling->leftmostChild->label,"*")==0){
+                //*
+                return atof(root->leftmostChild->label) * Fhandler(root->rightSibling->leftmostChild->rightSibling);
+            }else{
+                //going to be /
+                return atof(root->leftmostChild->label) / Fhandler(root->rightSibling->leftmostChild->rightSibling);
+            }
+        }
+    }
+}
+
+float Thandler(TREE root){
+    if(strcmp(root->rightSibling->leftmostChild->label,"e")==0){
+        return Fhandler(root->leftmostChild);
+    }else{
+        if(strcmp(root->rightSibling->leftmostChild->label,"+")==0){
+            //going to be +
+            return  Fhandler(root->leftmostChild) + Thandler(root->rightSibling->leftmostChild->rightSibling);
+        }else{
+            //going to be -
+            return  Fhandler(root->leftmostChild) - Thandler(root->rightSibling->leftmostChild->rightSibling);
+        }
+    }
+}
+
+
+
+
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+char* Nhandler(TREE root){
+    if(strcmp(root->leftmostChild->rightSibling->leftmostChild->label,"e")==0){
+        return root->leftmostChild->leftmostChild->label;
+    }else{
+        return concat(root->leftmostChild->leftmostChild->label, Nhandler(root->leftmostChild->rightSibling->leftmostChild));
+    }
+}
+
+void rNhandler(TREE child){
+    child->label=Nhandler(child);
+    child->leftmostChild=NULL;
+    child->rightSibling=NULL;
+}
+
+void parseN(TREE root){
+    if(!root){
+        return;
+    }
+    if(strcmp(root->label, "<N>")==0) {
+        rNhandler(root);
+    }
+
+    if(root->leftmostChild!=NULL){
+        parseN(root->leftmostChild);
+    }
+    if(root->rightSibling!=NULL){
+        parseN(root->rightSibling);
+    }
+
+}
+
+void stripParenthesis(TREE root){
+    if(!root){
+        return;
+    }
+    if(strcmp(root->label, "<F>")==0) {
+        if(strcmp(root->leftmostChild->label, "(")==0){
+            // root->leftmostChild->rightSibling->rightSibling==NULL;
+            root->leftmostChild=root->leftmostChild->rightSibling;
+            root->leftmostChild->rightSibling=NULL;
+        }
+    }
+
+    if(root->leftmostChild!=NULL){
+        stripParenthesis(root->leftmostChild);
+    }
+    if(root->rightSibling!=NULL){
+        stripParenthesis(root->rightSibling);
+    }
+}
+
+//this is part3
+
 void printTree(TREE root){
     printTreeRecursively(root, 0);
 }
 
 void printTreeRecursively(TREE root, int indent){
     char* label;
-    //label = (char*) malloc((indent+5)*sizeof(char));
     label = root->label;
     for(int i = 0; i<indent-1; i++){
         printf(" ");
@@ -1005,9 +1295,17 @@ void printTreeRecursively(TREE root, int indent){
     printf("%s", label);
     printf("\n");
     if(root->leftmostChild!=NULL){
-        printTreeRecursively(root->leftmostChild, indent + 3);
+        printTreeRecursively(root->leftmostChild, indent + 4);
     }
     if(root->rightSibling!=NULL){
         printTreeRecursively(root->rightSibling, indent);
+    }
+}
+void freeTree(TREE node){
+    if (node != NULL) {
+        freeTree(node->rightSibling);
+        freeTree(node->leftmostChild);
+        free(node->label);
+        free(node);
     }
 }
