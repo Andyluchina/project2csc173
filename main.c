@@ -61,10 +61,8 @@ int size2(struct Stack2* s2){
 #endif //PROJECT2CSC173_STACK_H
 
 char* nextTerminal;
-char currentCategory;
 TREE parseTree;
 char* parseTable[8][17];
-int numTerminals; //might not need
 
 TREE E();
 TREE T();
@@ -81,7 +79,6 @@ void printTree(TREE root);
 void printTreeRecursively(TREE root, int indent);
 int IsCharDigit(char c);
 
-float evalParseTree(TREE root);
 
 TREE makeNodeE(TREE T, TREE TT);
 
@@ -107,27 +104,13 @@ TREE makeNodeChar(char* x);
 
 //PART THREE DECLARATIONS
 char* concat(const char*, const char*);
-void printleaves(TREE root);
 void parseN(TREE root);
 void stripParenthesis(TREE root);
-float evalE(TREE root);
-float Fhandler(TREE root);
-float Thandler(TREE root);
-float EvaluateParseTree(TREE root);
+double evalE(TREE root);
+double Fhandler(TREE root);
+double Thandler(TREE root);
+double EvaluateParseTree(TREE root);
 
-
-void parseTable_free(char** parseTable) {
-    for (int i = 0; i < numTerminals; i++)
-    {
-        free(parseTable[i]);
-    }
-    free(parseTable);
-    parseTable = NULL;
-}
-
-char lookAhead(char* input){
-    return input[1];
-}
 
 void makeParseTable(){ //FUNCTION TO MAKE PARSE TABLE
     parseTable[0][0] = "ZRT"; //written in reverse so push in order of char(0), char(1)
@@ -522,15 +505,6 @@ char* getProduction(const char* character, const char* category){
     return "false";
 }
 
-int isTerminal(char* next){
-    if((strcmp(next, "0") == 0) || (strcmp(next, "1")) == 0 || (strcmp(next, "2")) == 0 || (strcmp(next, "3")) == 0 ||
-       (strcmp(next, "4")) == 0 || (strcmp(next, "5")) == 0 || (strcmp(next, "6")) == 0 || (strcmp(next, "7")) == 0 || (strcmp(next, "8")) == 0
-       || (strcmp(next, "9")) == 0 || (strcmp(next, "+")) == 0 || (strcmp(next, "-")) == 0 || (strcmp(next, "*")) == 0 || (strcmp(next, "/")) == 0
-       || (strcmp(next, "(")) == 0 || (strcmp(next, "$")) == 0 || (strcmp(next, ")")) == 0) {
-        return 1234567890;
-    }
-    return 0;
-}
 
 int isTerminalChar(char next){
     if(next == '0' || next == '1' || next == '2' || next == '3' || next == '4' || next == '5' || next == '6' || next == '7'
@@ -1162,18 +1136,18 @@ int IsCharDigit(char c) {
 }
 
 //this is part3
-float EvaluateParseTree(TREE root){
+double EvaluateParseTree(TREE root){
     parseN(root);
     stripParenthesis(root);
     return evalE(root);
 }
 
 
-float evalE(TREE root){
+double evalE(TREE root){
     return Thandler(root->leftmostChild);
 }
 
-float Fhandler(TREE root){
+double Fhandler(TREE root){
     if(strcmp(root->rightSibling->leftmostChild->label,"e")==0){
         //don't have a sign
         if(strcmp(root->leftmostChild->label,"<E>")==0){
@@ -1203,7 +1177,7 @@ float Fhandler(TREE root){
     }
 }
 
-float Thandler(TREE root){
+double Thandler(TREE root){
     if(strcmp(root->rightSibling->leftmostChild->label,"e")==0){
         return Fhandler(root->leftmostChild);
     }else{
