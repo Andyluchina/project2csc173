@@ -515,8 +515,6 @@ int isTerminalChar(char next){
     return 0;
 }
 
-
-//currently infinitely loops because <D> maps to <D>... need to map each to an individual number
 TREE tableDrivenParser(){
     struct Stack* s = createStack();
     struct Stack2* s2 = createStack2(30);
