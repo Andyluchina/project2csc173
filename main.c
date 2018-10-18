@@ -719,7 +719,7 @@ void expr(){
         }
 
 
-        printf("Constructing a parse tree using the input, %s, for a TABLE-DRIVEN PARSER", input2);
+        printf("Constructing a parse tree using the input, %s, for a TABLE-DRIVEN PARSER\n", input2);
 
         nextTerminal = strcat(input2, "$"); //doesn't work with empty string or spaces
         makeParseTable();
@@ -1105,8 +1105,10 @@ int IsCharDigit(char c) {
     return 0;
 }
 
+int good=0;
 //this is part3
 double EvaluateParseTree(TREE root){
+    good=0;
     parseN(root);
     stripParenthesis(root);
     return evalE(root);
@@ -1147,18 +1149,39 @@ double Fhandler(TREE root){
     }
 }
 
+
+
 double Thandler(TREE root){
+//            if(strcmp(root->rightSibling->leftmostChild->label,"+")==0){
+//                //going to be +
+//                return  Fhandler(root->leftmostChild) + Thandler(root->rightSibling->leftmostChild->rightSibling);
+//            }else {
+//                //going to be -
+//                if(strcmp(root->rightSibling->leftmostChild->rightSibling->rightSibling->leftmostChild->label, "-")){
+//                    root->rightSibling->leftmostChild->rightSibling->rightSibling->leftmostChild->label="+";
+//                }else if(strcmp(root->rightSibling->leftmostChild->rightSibling->rightSibling->leftmostChild->label, "+")){
+//                    root->rightSibling->leftmostChild->rightSibling->rightSibling->leftmostChild->label="-";
+//                }
+//                return Fhandler(root->leftmostChild) - Thandler(root->rightSibling->leftmostChild->rightSibling);
+//
+//
+//            }
+//
+//    }//
     if(strcmp(root->rightSibling->leftmostChild->label,"e")==0){
-        return Fhandler(root->leftmostChild);
-    }else{
-        if(strcmp(root->rightSibling->leftmostChild->label,"+")==0){
-            //going to be +
-            return  Fhandler(root->leftmostChild) + Thandler(root->rightSibling->leftmostChild->rightSibling);
-        }else{
-            //going to be -
-            return  Fhandler(root->leftmostChild) - Thandler(root->rightSibling->leftmostChild->rightSibling);
-        }
+       return Fhandler(root->leftmostChild);
     }
+        double result = Fhandler(root->leftmostChild);
+        while(strcmp(root->rightSibling->leftmostChild->label, "e")!=0){
+            if(strcmp(root->rightSibling->leftmostChild->label, "+")==0){
+                result +=Fhandler(root->rightSibling->leftmostChild->rightSibling->leftmostChild);
+            }else{
+                result-=Fhandler(root->rightSibling->leftmostChild->rightSibling->leftmostChild);
+            }
+            root=root->rightSibling->leftmostChild->rightSibling;
+
+        }
+        return result;
 }
 
 
