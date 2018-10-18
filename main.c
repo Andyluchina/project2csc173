@@ -259,7 +259,6 @@ void makeParseTable(){ //FUNCTION TO MAKE PARSE TABLE
 }
 
 char* getProduction(const char* character, const char* category){
-   // printf("GP character: %c category: %c\n", *character, *category);
     if(*category == 'E'){ //<E>
         if(*character == '0' || *character == '1' || *character == '2' || *character == '3' || *character == '4' || *character == '5'
            || *character == '6' || *character == '7' || *character == '8' || *character == '9'){
@@ -522,20 +521,12 @@ TREE tableDrivenParser(){
 
 
     push(s, "$"); //$ is end marker
-    printf("pushed $\n");
     push(s, "E"); //<E>
-    printf("pushed"
-           ""
-           ""
-           ""
-           " E\n");
 
 
     while(!isEmpty(s) || strlen(nextTerminal) > 0){
-        printf("nextTerminal: %s stack2 size: %d \n", nextTerminal, size2(s2));
         current = *nextTerminal;
         char popped = pop(s);
-        printf("popped: %c stackSize: %d current: %c \n", popped, size(s), current);
 
         if(popped == '$'){
 
@@ -591,11 +582,9 @@ TREE tableDrivenParser(){
                 push2(s2, makeNodeChar("*"));
             }
         }
-        printf("\n\n");
 
         if (current == '$' && popped == '$') { //IF WE DID IT
             nextTerminal++;
-            printf("Parsed\n");
             return pop2(s2);
         }
         else if((isTerminalChar(popped)) == 1234567890 ){ //IF THE POPPED IS A TERMINAL
@@ -603,12 +592,11 @@ TREE tableDrivenParser(){
                 nextTerminal++;
             }
             else{
-                printf("FAILED!");
                 return NULL;
             }
         }
 
-        //IF THE POPPED IS ACTION CHARACTER IS POPPED FOR CREATING THE PARSE TREE
+            //IF THE POPPED IS ACTION CHARACTER IS POPPED FOR CREATING THE PARSE TREE
         else if(popped =='U'){ //<D> production
             TREE numTree = pop2(s2);
             char*num = numTree->label;
@@ -649,8 +637,8 @@ TREE tableDrivenParser(){
             push2(s2, pop);
         }
         else if(popped =='L'){ //This is <FT> with epsilon production
-           // TREE po= pop2(s2);
-           // printTree(po);
+            // TREE po= pop2(s2);
+            // printTree(po);
             push2(s2, makeNodeEmpty("<FT>"));
         }
         else if(popped =='B'){ //This is <F> with <N> prodcution
@@ -682,7 +670,6 @@ TREE tableDrivenParser(){
         else { //IF THE POPPED IS A SYNTACTIC CATEGORY
             char* currentProduction = getProduction(&current, &popped);
             if( strcmp(currentProduction, "K") ==0){
-                printf("FAILED!");
                 return NULL;
             }
             if (strcmp(currentProduction, "false") != 0) {
@@ -700,65 +687,29 @@ TREE tableDrivenParser(){
                 free_Stack(s);
                 free(s2->TreeArray);
                 free(s2);
-
-
-                printf("NOT A VALID ENTRY\n");
                 break;
             }
         }
     }
-    printf("END WHILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-
-    printf("-----------------------------------------------------\n");
     return NULL;
 
 }
 
-//IF THE INPUT IS NOT WELL-FORMED, THE PARSER SHOULD PRINT AN APPROPRIATE MESSAGE AND RESUME PROCESSING AT THE NEXT LINE OF INPUT
-//(I.E. SKIP TO THE NEXT NEW LINE)
-
-int main(int argc, char* args[]) {
-
-
+void expr(){
     char input[256] = "";
     char input2[256] = "";
-    printf("Now testing the table driven parser... \n");
-    while (strcmp(input2, "quit") != 0) {
-        printf("Enter an expression to construct a parse tree using a TABLE-DRIVEN PARSER(\"quit\" to quit):");
-        //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
-        //but this is ok(?) because 32 + 4 doesn't work with this code
-        //however 32 + 4+32 will work...
-        scanf("%s", input2); //depreciated but added ability to use depreciated functions
-        if(strcmp(input2, "quit") == 0){
-            break;
-        }
-        nextTerminal = strcat(input2, "$"); //doesn't work with empty string or spaces
-
-//        printf("nextTerminal: %s \n", nextTerminal);
-        makeParseTable();
-        TREE parseTree2 = tableDrivenParser();
-        if (*nextTerminal == '\0' && parseTree2 != NULL) {
-            printTree(parseTree2);
-            printf("THE TREE ANSWER: %f \n", EvaluateParseTree(parseTree2));
-        } else {
-        }
-    }
     while (strcmp(input, "quit") != 0) {
         printf("Enter an expression to construct a parse tree using a recursive-descent parser (\"quit\" to quit):");
-        //scanf can't read spaces... 32+4 works but 32 + 4 will fail because it tests "32", "+", and "4" separately with 32 and 4 working but failing on +
-        //but this is ok(?) because 32 + 4 doesn't work with this code
-        //however 32 + 4+32 will work...
         scanf("%s", input); //depreciated but added ability to use depreciated functions
+        strcpy(input2, input);
         if(strcmp(input, "quit") == 0){
             break;
         }
         nextTerminal = strcat(input, "");
 
-//        printf("nextTerminal: %s \n", nextTerminal);
-        //makeParseTable();
         parseTree = E();
-       // parseTree = tableDrivenParser(input);
+
         if (*nextTerminal == '\0' && parseTree != NULL) {
             printTree(parseTree);
             printf("THE TREE ANSWER: %f \n", EvaluateParseTree(parseTree));
@@ -766,7 +717,28 @@ int main(int argc, char* args[]) {
         } else {
             printf("FAILED!\n");
         }
+
+
+        printf("Constructing a parse tree using the input, %s, for a TABLE-DRIVEN PARSER", input2);
+
+        nextTerminal = strcat(input2, "$"); //doesn't work with empty string or spaces
+        makeParseTable();
+        TREE parseTree2 = tableDrivenParser();
+        if (*nextTerminal == '\0' && parseTree2 != NULL) {
+            printTree(parseTree2);
+            printf("THE TREE ANSWER: %f \n", EvaluateParseTree(parseTree2));
+        } else {
+            printf("FAILED!\n");
+        }
+
     }
+
+
+}
+
+
+int main(int argc, char* args[]) {
+    expr();
     return 0;
 }
 

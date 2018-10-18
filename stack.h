@@ -7,8 +7,8 @@ struct Stack{
 };
 
 struct Stack* createStack(){
-    struct Stack* s = (struct Stack*)malloc(sizeof(struct Stack));
-    s->stack = (char*)malloc(sizeof(char*));
+    struct Stack* s = (struct Stack*)malloc(sizeof(struct Stack) * 100);
+    s->stack = (char*)malloc(sizeof(char) * 100);
     s->top = -1;
     return s;
 };
